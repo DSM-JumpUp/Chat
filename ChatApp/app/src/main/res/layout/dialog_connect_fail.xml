@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="300dp"
+    android:layout_height="150dp"
+    android:layout_gravity="center">
+
+    <ImageButton
+        android:id="@+id/btn_dialog_connect_fail_cancel"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_margin="10dp"
+        android:background="@drawable/dialog_cancel_icon"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/text1_connect_fail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="주변 사람들을 찾지 못하였습니다."
+        android:textColor="@color/colorPrimary"
+        app:layout_constraintBottom_toTopOf="@id/text2_connect_fail"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed" />
+
+    <TextView
+        android:id="@+id/text2_connect_fail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="죄송합니다."
+        android:textColor="@color/colorPrimary"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text1_connect_fail" />
+</android.support.constraint.ConstraintLayout>
