@@ -27,17 +27,17 @@
         android:id="@+id/recycler_chat"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@id/layout_bottom_edit"
+        app:layout_constraintBottom_toTopOf="@id/layout_bottom_message"
         app:layout_constraintTop_toBottomOf="@id/toolbar_chat"
         app:layout_constraintVertical_weight="1"></android.support.v7.widget.RecyclerView>
 
     <android.support.constraint.ConstraintLayout
-        android:id="@+id/layout_bottom_edit"
+        android:id="@+id/layout_bottom_message"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/colorWhite"
         android:padding="5dp"
-        app:layout_constraintBottom_toTopOf="@id/layout_bottom_btn"
+        app:layout_constraintBottom_toTopOf="@id/layout_bottom_sheet"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
@@ -47,7 +47,7 @@
             android:layout_height="22dp"
             android:background="@drawable/chat_plus_icon"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/layout_edittext_btn"
+            app:layout_constraintEnd_toStartOf="@id/layout_edit_btn"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -58,12 +58,12 @@
             android:background="@drawable/chat_cancel_icon"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/layout_edittext_btn"
+            app:layout_constraintEnd_toStartOf="@id/layout_edit_btn"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <android.support.constraint.ConstraintLayout
-            android:id="@+id/layout_edittext_btn"
+            android:id="@+id/layout_edit_btn"
             android:layout_width="0dp"
             android:layout_height="37dp"
             android:background="@drawable/edit_chat_round"
@@ -95,7 +95,7 @@
     </android.support.constraint.ConstraintLayout>
 
     <android.support.constraint.ConstraintLayout
-        android:id="@+id/layout_bottom_btn"
+        android:id="@+id/layout_bottom_sheet"
         android:layout_width="match_parent"
         android:layout_height="70dp"
         android:visibility="gone"
