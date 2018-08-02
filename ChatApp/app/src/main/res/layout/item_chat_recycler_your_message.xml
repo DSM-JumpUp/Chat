@@ -6,7 +6,7 @@
     android:padding="10dp">
 
     <TextView
-        android:id="@+id/text_chat_your_message"
+        android:id="@+id/text_chat_message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/chatbubble_chat_your_message"
@@ -20,14 +20,14 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/text_chat_your_time"
+        android:id="@+id/text_chat_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
         android:text="09:36"
         android:textColor="@color/colorGrayLight"
         android:textSize="13dp"
-        app:layout_constraintBottom_toBottomOf="@id/text_chat_your_message"
-        app:layout_constraintStart_toEndOf="@id/text_chat_your_message" />
+        app:layout_constraintBottom_toBottomOf="@id/text_chat_message"
+        app:layout_constraintStart_toEndOf="@id/text_chat_message" />
 
 </android.support.constraint.ConstraintLayout>

@@ -9,7 +9,7 @@ import io.socket.client.Socket;
 
 public class SocketApplication extends Application {
 
-    private Socket mSocket;
+    private static Socket mSocket;
     {
         try {
             mSocket = IO.socket("https://amuguna.herokuapp.com/");
@@ -17,7 +17,7 @@ public class SocketApplication extends Application {
             ue.printStackTrace();
         }
     }
-    public Socket getSocket() {
+    public static Socket getSocket() {
         return mSocket;
     }
 }

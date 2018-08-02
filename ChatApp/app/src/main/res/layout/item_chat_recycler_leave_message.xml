@@ -11,10 +11,10 @@
         android:text="익명의 너구리"
         android:textColor="@color/colorPrimary"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/text_chat_message"
+        app:layout_constraintEnd_toStartOf="@id/text_chat_leave_message"
         app:layout_constraintHorizontal_chainStyle="packed"/>
     <TextView
-        android:id="@+id/text_chat_message"
+        android:id="@+id/text_chat_leave_message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="님이 채팅방을 나갔습니다."
