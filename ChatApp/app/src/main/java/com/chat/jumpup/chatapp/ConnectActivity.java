@@ -1,31 +1,22 @@
 package com.chat.jumpup.chatapp;
-import android.Manifest;
-import android.app.Activity;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.os.Build;
 import android.os.Handler;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
-import android.widget.Toast;
-
-
-
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.Enumeration;
 
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
@@ -47,18 +38,11 @@ public class ConnectActivity extends AppCompatActivity {
     private boolean isAccessFineLocation = false;
     private boolean isAccessCoarseLocation = false;
     private boolean isPermission = false;
+    private JSONObject data;
 
     private GPSInfo gps;
+    private Button startConnectButton;
 
-
-
-    Button button;
-
-    @Override
-    protected void onRestart() {
-        super.onRestart();
-//        GPSPermission();
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +50,7 @@ public class ConnectActivity extends AppCompatActivity {
         setContentView(R.layout.activity_connect);
 
         gps = new GPSInfo(ConnectActivity.this);
+        data = new JSONObject();
 
         if(gps.isGetLocation()) {
             gps.getLocation();
@@ -102,11 +87,10 @@ public class ConnectActivity extends AppCompatActivity {
         });
 
 
-        button = findViewById(R.id.btn_connect_start);
-        button.setOnClickListener(clickFind);
+        startConnectButton = findViewById(R.id.btn_connect_start);
+        startConnectButton.setOnClickListener(clickFind);
 
         mSocket.on("join", joinData);
-        mSocket.on("exit", exitRoom);
     }
 
     @Override
@@ -147,6 +131,15 @@ public class ConnectActivity extends AppCompatActivity {
     private View.OnClickListener clickFind = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
+
+            try {
+                data.put("ip",getLocalIpAddress());
+                Log.d("Debug","ip : "+getLocalIpAddress());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            mSocket.emit("ip check", data);
+            mSocket.on("block", block);
             gps.getLocation();
             lat = gps.getLat();
             lng = gps.getLng();
@@ -253,60 +246,6 @@ public class ConnectActivity extends AppCompatActivity {
             isPermission = true;
         }
     }
-    private void callPermission() {
-        // Check the SDK version and whether the permission is already granted or not.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
-                && checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-
-            requestPermissions(
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSIONS_ACCESS_FINE_LOCATION);
-
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
-                && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED){
-
-            requestPermissions(
-                    new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
-                    PERMISSIONS_ACCESS_COARSE_LOCATION);
-        } else {
-            isPermission = true;
-        }
-    }
-
-
-//
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        if(resultCode == Activity.RESULT_OK && requestCode == 1) {
-//            if(EasyPermissions.hasPermissions(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
-//
-//            }
-//        } else {
-//            EasyPermissions.onRequestPermissionsResult(this, getString(R.string.needToPermissions), );
-//        }
-//    }
-
-    //    @Override
-//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-//        boolean allowed = true;
-//
-//        switch (requestCode) {
-//            case 0:
-//                for (int res: grantResults) {
-//                    allowed = allowed && (res == PackageManager.PERMISSION_GRANTED);
-//                }
-//                break;
-//
-//            default:
-//                allowed = false;
-//                break;
-//        }
-//        if(!allowed) {
-//            Toast.makeText(getApplicationContext(), "권한이 거부되었습니다.", Toast.LENGTH_LONG).show();
-//        }
-//    }
 
     private JSONObject setGPSData(double lat, double lng, int length) throws JSONException {
         JSONObject GPSData = new JSONObject();
@@ -319,26 +258,34 @@ public class ConnectActivity extends AppCompatActivity {
 
         return GPSData;
     }
-    private Emitter.Listener exitRoom = new Emitter.Listener() {
+
+    private Emitter.Listener block = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            runOnUiThread(new Runnable() {
-                public void run() {
-                    Toast.makeText(getApplicationContext(), "상대방이 방을 떠났습니다.", Toast.LENGTH_SHORT).show();
-                }
-            });
-        };
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        android.os.Process.killProcess(android.os.Process.myPid());
+                    }
+                });
+        }
     };
 
-//    public void GPSPermission() {
-//        if (getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)) {
-//            if (hasPermissions()) {
-////                Toast.makeText(getApplicationContext(), "이미 허용함.", Toast.LENGTH_LONG).show();
-//            } else {
-//                requestPerms();
-//            }
-//        } else {
-////            Toast.makeText(getApplicationContext(), "이용할 수 없음.", Toast.LENGTH_LONG).show();
-//        }
-//    }
+    public static String getLocalIpAddress() {
+        try {
+            for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
+                NetworkInterface intf = en.nextElement();
+                for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
+                    InetAddress inetAddress = enumIpAddr.nextElement();
+                    if (!inetAddress.isLoopbackAddress() && inetAddress instanceof Inet4Address) {
+                        return inetAddress.getHostAddress();
+                    }
+                }
+            }
+        } catch (SocketException ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
+
 }

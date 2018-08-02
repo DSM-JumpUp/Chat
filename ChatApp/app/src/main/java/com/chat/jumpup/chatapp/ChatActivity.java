@@ -15,11 +15,17 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
@@ -41,6 +47,7 @@ public class ChatActivity extends AppCompatActivity {
     private JSONObject data;
     private String yourMessage, myMessage;
     private Intent intent;
+    private ChatReportDialog chatReportDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +76,7 @@ public class ChatActivity extends AppCompatActivity {
         intent = getIntent();
 
         socket.on("message",receiveMassage);
+        socket.on("ip",ip);
 
         nicknameTextView.setText(intent.getStringExtra("peerName"));
 
@@ -124,16 +132,32 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-//        reportButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                chatReportDialog = new ChatReportDialog(ChatActivity.this, reportClickListener, cancelClickListener);
-//                chatReportDialog.setCancelable(true);
-//                chatReportDialog.getWindow().setGravity(Gravity.CENTER);
-//                chatReportDialog.show();
-//            }
-//        });
+        reportButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                chatReportDialog = new ChatReportDialog(ChatActivity.this, reportClickListener, cancelClickListener);
+                chatReportDialog.setCancelable(true);
+                chatReportDialog.getWindow().setGravity(Gravity.CENTER);
+                chatReportDialog.show();
+            }
+        });
     }
+
+    private View.OnClickListener reportClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            socket.emit("siren");
+            Toast.makeText(getApplicationContext(),"신고가 완료되었습니다.",Toast.LENGTH_SHORT).show();
+            chatReportDialog.dismiss();
+        }
+    };
+
+    private View.OnClickListener cancelClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            chatReportDialog.dismiss();
+        }
+    };
 
 
     private Emitter.Listener receiveMassage = new Emitter.Listener() {
@@ -158,4 +182,39 @@ public class ChatActivity extends AppCompatActivity {
             });
         }
     };
+
+    private Emitter.Listener ip = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    JSONObject ipData = new JSONObject();
+                    Log.d("Debug","on ip");
+                    try {
+                        ipData.put("ip",getLocalIpAddress());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    socket.emit("ip",ipData);
+                }
+            });
+        }
+    };
+    public static String getLocalIpAddress() {
+        try {
+            for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
+                NetworkInterface intf = en.nextElement();
+                for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
+                    InetAddress inetAddress = enumIpAddr.nextElement();
+                    if (!inetAddress.isLoopbackAddress() && inetAddress instanceof Inet4Address) {
+                        return inetAddress.getHostAddress();
+                    }
+                }
+            }
+        } catch (SocketException ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
 }
