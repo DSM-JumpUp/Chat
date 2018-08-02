@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="10dp">
+
+    <TextView
+        android:id="@+id/text_chat_my_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
+        android:text="09:36"
+        android:textColor="@color/colorGrayLight"
+        android:textSize="13dp"
+        app:layout_constraintBottom_toBottomOf="@id/text_chat_my_message"
+        app:layout_constraintEnd_toStartOf="@id/text_chat_my_message" />
+
+    <TextView
+        android:id="@+id/text_chat_my_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/chatbubble_chat_my_message"
+        android:padding="10dp"
+        android:paddingEnd="15dp"
+        android:paddingStart="15dp"
+        android:text="my message"
+        android:textColor="@color/colorWhite"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</android.support.constraint.ConstraintLayout>
