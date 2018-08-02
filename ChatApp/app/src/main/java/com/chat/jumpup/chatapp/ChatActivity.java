@@ -1,5 +1,6 @@
 package com.chat.jumpup.chatapp;
 
+import android.content.Context;
 import android.content.Intent;
 import android.media.Image;
 import android.support.constraint.ConstraintLayout;
@@ -12,6 +13,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -101,6 +103,7 @@ public class ChatActivity extends AppCompatActivity {
                 }
             }
         });
+
         //plusButton을 클릭하였을 경우 숨겨진 버튼들이 보여짐
         plusButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -108,6 +111,9 @@ public class ChatActivity extends AppCompatActivity {
                 bottomSheetLayout.setVisibility(View.VISIBLE);
                 plusButton.setVisibility(View.GONE);
                 cancelButton.setVisibility(View.VISIBLE);
+                //plusButton을 클릭했을 경우 키보드 내리기
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(messageEditText.getWindowToken(), 0);
             }
         });
 
@@ -183,6 +189,7 @@ public class ChatActivity extends AppCompatActivity {
         }
     };
 
+    //ip를 보내야 할 경우
     private Emitter.Listener ip = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
@@ -196,11 +203,14 @@ public class ChatActivity extends AppCompatActivity {
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
+                    //server로 ip보내기
                     socket.emit("ip",ipData);
                 }
             });
         }
     };
+
+    //ip받아오는 메서드
     public static String getLocalIpAddress() {
         try {
             for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {

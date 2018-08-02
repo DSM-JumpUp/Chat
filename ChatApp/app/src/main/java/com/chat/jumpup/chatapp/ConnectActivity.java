@@ -1,4 +1,5 @@
 package com.chat.jumpup.chatapp;
+
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Handler;
@@ -9,6 +10,8 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -33,7 +36,8 @@ public class ConnectActivity extends AppCompatActivity {
     private boolean isGPSEnabled;
     private boolean isNetworkEnabled;
     private double lat, lng;
-    private int length;    private final int PERMISSIONS_ACCESS_FINE_LOCATION = 1000;
+    private int length;
+    private final int PERMISSIONS_ACCESS_FINE_LOCATION = 1000;
     private final int PERMISSIONS_ACCESS_COARSE_LOCATION = 1001;
     private boolean isAccessFineLocation = false;
     private boolean isAccessCoarseLocation = false;
@@ -52,7 +56,7 @@ public class ConnectActivity extends AppCompatActivity {
         gps = new GPSInfo(ConnectActivity.this);
         data = new JSONObject();
 
-        if(gps.isGetLocation()) {
+        if (gps.isGetLocation()) {
             gps.getLocation();
             lat = gps.getLat();
             lng = gps.getLng();
@@ -61,8 +65,6 @@ public class ConnectActivity extends AppCompatActivity {
         }
 
         mHandler = new Handler();
-
-//        GPSPermission();
 
         socketApp = (SocketApplication) getApplication();
 
@@ -133,12 +135,14 @@ public class ConnectActivity extends AppCompatActivity {
         public void onClick(View view) {
 
             try {
-                data.put("ip",getLocalIpAddress());
-                Log.d("Debug","ip : "+getLocalIpAddress());
+                data.put("ip", getLocalIpAddress());
+                Log.d("Debug", "ip : " + getLocalIpAddress());
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+            //Server로 ip check전송
             mSocket.emit("ip check", data);
+            //Server로 부터 block 받았을 경우 block메서드 실행
             mSocket.on("block", block);
             gps.getLocation();
             lat = gps.getLat();
@@ -234,15 +238,16 @@ public class ConnectActivity extends AppCompatActivity {
             dialogFailureActivity.dismiss();
         }
     };
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if(requestCode == PERMISSIONS_ACCESS_FINE_LOCATION && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        if (requestCode == PERMISSIONS_ACCESS_FINE_LOCATION && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             isAccessFineLocation = true;
-        } else if( requestCode == PERMISSIONS_ACCESS_COARSE_LOCATION && grantResults[0] == PackageManager.PERMISSION_GRANTED ) {
+        } else if (requestCode == PERMISSIONS_ACCESS_COARSE_LOCATION && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             isAccessCoarseLocation = true;
         }
 
-        if(isAccessFineLocation && isAccessCoarseLocation) {
+        if (isAccessFineLocation && isAccessCoarseLocation) {
             isPermission = true;
         }
     }
@@ -254,28 +259,37 @@ public class ConnectActivity extends AppCompatActivity {
         GPSData.put("lng", lng);
         GPSData.put("length", length);
 
-        Log.d("GPSData", "lat : " + lat + " ,lng" + lng );
+        Log.d("GPSData", "lat : " + lat + " ,lng" + lng);
 
         return GPSData;
     }
 
+    //block된 유저일 경우 실행하는 메서드
     private Emitter.Listener block = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        android.os.Process.killProcess(android.os.Process.myPid());
-                    }
-                });
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(getApplicationContext(), "당신은 블록된 유저입니다.", Toast.LENGTH_SHORT).show();
+                    Runnable mMyTask = new Runnable() {
+                        @Override
+                        public void run() {
+                            android.os.Process.killProcess(android.os.Process.myPid());
+                        }
+                    };
+                    mHandler.postDelayed(mMyTask, 1500);
+
+                }
+            });
         }
     };
 
     public static String getLocalIpAddress() {
         try {
-            for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
+            for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements(); ) {
                 NetworkInterface intf = en.nextElement();
-                for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
+                for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements(); ) {
                     InetAddress inetAddress = enumIpAddr.nextElement();
                     if (!inetAddress.isLoopbackAddress() && inetAddress instanceof Inet4Address) {
                         return inetAddress.getHostAddress();
