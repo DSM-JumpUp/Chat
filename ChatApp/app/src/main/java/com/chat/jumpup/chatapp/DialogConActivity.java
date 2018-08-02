@@ -38,6 +38,7 @@ public class DialogConActivity extends Dialog {
         setContentView(R.layout.dialog_connect);
 
         cancelBtn = findViewById(R.id.btn_dialog_connect_cancel);
+        findingText = findViewById(R.id.text_dialog_connect_finding);
         findingText.setText(length + "이내 사람들을 찾는 중입니다.");
 
         cancelBtn.setOnClickListener((View.OnClickListener) mCancelClick);
