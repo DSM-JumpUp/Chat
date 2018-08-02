@@ -22,8 +22,6 @@ import android.util.Log;
 
 import java.util.List;
 
-import pub.devrel.easypermissions.EasyPermissions;
-
 public class GPSInfo extends Service implements LocationListener {
     private Context mContext;
 
