@@ -1,11 +1,16 @@
 package com.chat.jumpup.chatapp;
 
+import android.content.Intent;
+import android.media.Image;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -31,9 +36,11 @@ public class ChatActivity extends AppCompatActivity {
     private LinearLayoutManager layoutManager;
     private ChatRecyclerAdapter chatRecyclerAdapter;
     private ArrayList<ChatRecyclerItem> chatRecyclerItems = null;
-    private ImageButton messageSendButton;
+    private ImageButton messageSendButton, plusButton, cancelButton, leaveRoomButton, reportButton;
+    private ConstraintLayout bottomSheetLayout;
     private JSONObject data;
     private String yourMessage, myMessage;
+    private Intent intent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,14 +55,22 @@ public class ChatActivity extends AppCompatActivity {
         layoutManager = new LinearLayoutManager(this);
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         messageSendButton = (ImageButton) findViewById(R.id.btn_chat_send_message);
+        plusButton = (ImageButton)findViewById(R.id.btn_chat_plus);
+        cancelButton = (ImageButton)findViewById(R.id.btn_chat_cancel);
+        leaveRoomButton = (ImageButton)findViewById(R.id.btn_chat_leave);
+        reportButton = (ImageButton)findViewById(R.id.btn_chat_report);
+        bottomSheetLayout = (ConstraintLayout)findViewById(R.id.layout_bottom_sheet);
         chatRecyclerItems = new ArrayList();
         data = new JSONObject();
         chatRecycler.setLayoutManager(layoutManager);
         chatRecycler.setItemAnimator(new DefaultItemAnimator());
         chatRecyclerAdapter = new ChatRecyclerAdapter(chatRecyclerItems);
         chatRecycler.setAdapter(chatRecyclerAdapter);
+        intent = getIntent();
 
         socket.on("message",receiveMassage);
+
+        nicknameTextView.setText(intent.getStringExtra("peerName"));
 
         messageSendButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -78,7 +93,48 @@ public class ChatActivity extends AppCompatActivity {
                 }
             }
         });
+        //plusButton을 클릭하였을 경우 숨겨진 버튼들이 보여짐
+        plusButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                bottomSheetLayout.setVisibility(View.VISIBLE);
+                plusButton.setVisibility(View.GONE);
+                cancelButton.setVisibility(View.VISIBLE);
+            }
+        });
+
+        //cancelButton을 클릭하였을 경우 보여졌던 버튼들이 다시 숨겨짐
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                bottomSheetLayout.setVisibility(View.GONE);
+                plusButton.setVisibility(View.VISIBLE);
+                cancelButton.setVisibility(View.GONE);
+            }
+        });
+
+        //채팅방 나가기 버튼을 클릭하였을 경우 Server로 leave room전송 후 ConnectActivity로 이동
+        leaveRoomButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                socket.emit("leave room");
+                Log.d("Debug","leave Button clicked");
+                Intent intent = new Intent(ChatActivity.this, ConnectActivity.class);
+                startActivity(intent);
+            }
+        });
+
+//        reportButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                chatReportDialog = new ChatReportDialog(ChatActivity.this, reportClickListener, cancelClickListener);
+//                chatReportDialog.setCancelable(true);
+//                chatReportDialog.getWindow().setGravity(Gravity.CENTER);
+//                chatReportDialog.show();
+//            }
+//        });
     }
+
 
     private Emitter.Listener receiveMassage = new Emitter.Listener() {
         @Override
