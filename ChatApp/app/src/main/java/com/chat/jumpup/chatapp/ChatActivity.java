@@ -26,12 +26,15 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Enumeration;
 
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 
+import static com.chat.jumpup.chatapp.ChatRecyclerAdapter.VIEW_TYPE_LEAVE_MESSAGE;
 import static com.chat.jumpup.chatapp.ChatRecyclerAdapter.VIEW_TYPE_MY_MESSAGE;
 import static com.chat.jumpup.chatapp.ChatRecyclerAdapter.VIEW_TYPE_YOUR_MESSAGE;
 
@@ -47,7 +50,10 @@ public class ChatActivity extends AppCompatActivity {
     private ImageButton messageSendButton, plusButton, cancelButton, leaveRoomButton, reportButton;
     private ConstraintLayout bottomSheetLayout;
     private JSONObject data;
-    private String yourMessage, myMessage;
+    private long now;
+    private Date nowDate;
+    private SimpleDateFormat timeDateFormat;
+    private String yourMessage, myMessage,nickname, timeText;
     private Intent intent;
     private ChatReportDialog chatReportDialog;
 
@@ -78,8 +84,10 @@ public class ChatActivity extends AppCompatActivity {
         intent = getIntent();
 
         socket.on("message",receiveMassage);
+        socket.on("exit",exit);
         socket.on("ip",ip);
 
+        nickname = intent.getStringExtra("peerName");
         nicknameTextView.setText(intent.getStringExtra("peerName"));
 
         messageSendButton.setOnClickListener(new View.OnClickListener() {
@@ -90,7 +98,7 @@ public class ChatActivity extends AppCompatActivity {
                         myMessage = messageEditText.getText().toString();
                         data.put("message",myMessage);
                         socket.emit("message",data);
-                        chatRecyclerItems.add(new ChatRecyclerItem.Builder().Build(VIEW_TYPE_MY_MESSAGE, myMessage));
+                        chatRecyclerItems.add(new ChatRecyclerItem(0, messageEditText.getText().toString(), getTimeText()));
                         //채팅 목록 갱신
                         chatRecyclerAdapter.notifyDataSetChanged();
                         //채팅 목록이 가장 최근 메시지를 가르키도록 설정
@@ -176,7 +184,7 @@ public class ChatActivity extends AppCompatActivity {
                     try {
                         //yourMessage에 서버로부터 받은 데이터에서 message를 얻어와 채팅 목록에 띄워주기
                         yourMessage = data.getString("message");
-                        chatRecyclerItems.add(new ChatRecyclerItem.Builder().Build(VIEW_TYPE_YOUR_MESSAGE, yourMessage));
+                        chatRecyclerItems.add(new ChatRecyclerItem(1, yourMessage, getTimeText()));
                         //채팅 목록 갱신
                         chatRecyclerAdapter.notifyDataSetChanged();
                         //채팅 목록이 가장 최근 메시지를 가르키도록 설정
@@ -184,6 +192,23 @@ public class ChatActivity extends AppCompatActivity {
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
+                }
+            });
+        }
+    };
+
+    private Emitter.Listener exit = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Log.d("Debug","exit");
+                    chatRecyclerItems.add(new ChatRecyclerItem(2, nickname));
+                    //채팅 목록 갱신
+                    chatRecyclerAdapter.notifyDataSetChanged();
+                    //채팅 목록이 가장 최근 메시지를 가르키도록 설정
+                    chatRecycler.smoothScrollToPosition(chatRecyclerItems.size() - 1);
                 }
             });
         }
@@ -209,6 +234,15 @@ public class ChatActivity extends AppCompatActivity {
             });
         }
     };
+
+    private String getTimeText() {
+        now = System.currentTimeMillis();
+        nowDate = new Date(now);
+        timeDateFormat = new SimpleDateFormat("hh:mm");
+        timeText = timeDateFormat.format(nowDate);
+
+        return timeText;
+    }
 
     //ip받아오는 메서드
     public static String getLocalIpAddress() {

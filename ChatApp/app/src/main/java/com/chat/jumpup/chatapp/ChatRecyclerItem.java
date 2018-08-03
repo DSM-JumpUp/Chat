@@ -1,9 +1,5 @@
 package com.chat.jumpup.chatapp;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Locale;
 
 public class ChatRecyclerItem {
     String messageText, timeText, leaveMessageText;
@@ -25,17 +21,14 @@ public class ChatRecyclerItem {
         return itemViewType;
     }
 
-    public static class Builder{
-        DateFormat dateFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
-        Calendar cal = Calendar.getInstance();
-
-        public ChatRecyclerItem Build(int itemViewType, String message) {
-            ChatRecyclerItem chatRecyclerItem = new ChatRecyclerItem();
-            chatRecyclerItem.itemViewType = itemViewType;
-            chatRecyclerItem.messageText = message;
-            chatRecyclerItem.timeText = dateFormat.format(cal.getTime());
-            return chatRecyclerItem;
-        }
+    ChatRecyclerItem(int itemViewType, String messageText, String timeText) {
+        this.itemViewType = itemViewType;
+        this.messageText = messageText;
+        this.timeText = timeText;
+    }
+    ChatRecyclerItem(int itemViewType, String leaveMessageText) {
+        this.itemViewType = itemViewType;
+        this.leaveMessageText = leaveMessageText;
     }
 
 }
