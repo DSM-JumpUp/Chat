@@ -31,7 +31,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:hint="신고 사요를 입력해주세요."
+        android:hint="신고 사유를 입력해주세요."
         android:gravity="top"
         android:padding="5dp"
         android:textSize="12sp"
